@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>THE POINT SYSTEM — Activity Scoreboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#120F2E;
+    --ink-2:#1B1748;
+    --cream:#FFF6E9;
+    --cyan:#34E8E5;
+    --violet:#8B5CFF;
+    --pink:#FF3D8A;
+    --orange:#FF7A3D;
+    --blue:#4D8CFF;
+    --lime:#B4FF3D;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{
+    background:var(--ink);
+    color:var(--cream);
+    font-family:'Space Grotesk', sans-serif;
+    overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3, .display{
+    font-family:'Archivo Black', sans-serif;
+    text-transform:uppercase;
+    letter-spacing:0.01em;
+  }
+  .mono{ font-family:'JetBrains Mono', monospace; }
+
+  /* ---------- background texture ---------- */
+  .bg-glow{
+    position:fixed; inset:0; z-index:-1; overflow:hidden;
+  }
+  .blob{
+    position:absolute; border-radius:50%; filter:blur(90px); opacity:0.35;
+    animation: drift 18s ease-in-out infinite alternate;
+  }
+  .blob.b1{ width:520px; height:520px; background:var(--pink); top:-160px; left:-120px; }
+  .blob.b2{ width:460px; height:460px; background:var(--cyan); bottom:-140px; right:-100px; animation-delay:-4s;}
+  .blob.b3{ width:380px; height:380px; background:var(--violet); top:40%; left:60%; animation-delay:-9s;}
+  @keyframes drift{
+    0%{ transform:translate(0,0) scale(1); }
+    100%{ transform:translate(40px,-30px) scale(1.15); }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .blob{ animation:none; }
+  }
+
+  /* ---------- layout shell ---------- */
+  .wrap{ max-width:1180px; margin:0 auto; padding:0 24px; }
+  section{ padding:88px 0; position:relative; }
+
+  /* ---------- nav ---------- */
+  nav{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:22px 24px; max-width:1180px; margin:0 auto;
+  }
+  .logo{ font-size:15px; letter-spacing:0.14em; }
+  .logo span{ color:var(--lime); }
+  nav .tag{
+    font-family:'JetBrains Mono', monospace; font-size:11px; letter-spacing:0.1em;
+    color:var(--cream); opacity:0.55;
+  }
+
+  /* ---------- hero ---------- */
+  .hero{ padding-top:40px; padding-bottom:60px; }
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:8px;
+    font-family:'JetBrains Mono', monospace; font-size:12px; letter-spacing:0.14em;
+    color:var(--lime); border:1px solid rgba(180,255,61,0.35); border-radius:100px;
+    padding:6px 14px; margin-bottom:26px;
+  }
+  .eyebrow::before{ content:"●"; font-size:8px; animation:pulse 1.6s infinite; }
+  @keyframes pulse{ 0%,100%{opacity:1;} 50%{opacity:0.25;} }
+
+  .hero h1{
+    font-size:clamp(42px, 8vw, 92px);
+    line-height:0.98;
+    max-width:900px;
+  }
+  .hero h1 .accent{ color:var(--pink); -webkit-text-stroke:2px var(--cream); }
+  .hero p.lede{
+    max-width:560px; font-size:18px; line-height:1.55; margin-top:26px; opacity:0.82;
+    font-weight:400;
+  }
+
+  /* ticker */
+  .ticker-outer{
+    margin-top:56px; border-top:1px solid rgba(255,246,233,0.15); border-bottom:1px solid rgba(255,246,233,0.15);
+    overflow:hidden; white-space:nowrap; padding:16px 0;
+  }
+  .ticker-track{
+    display:inline-block; animation: scroll-left 32s linear infinite;
+  }
+  .ticker-track span{
+    font-family:'JetBrains Mono', monospace; font-size:14px; margin-right:36px; opacity:0.8;
+  }
+  .ticker-track span b{ color:var(--cyan); }
+  @keyframes scroll-left{
+    from{ transform:translateX(0); }
+    to{ transform:translateX(-50%); }
+  }
+
+  /* ---------- principles ---------- */
+  .section-head{ margin-bottom:44px; }
+  .section-head .kicker{
+    font-family:'JetBrains Mono', monospace; font-size:12px; letter-spacing:0.16em;
+    color:var(--cyan); margin-bottom:10px; display:block;
+  }
+  .section-head h2{ font-size:clamp(28px,4vw,44px); }
+
+  .principle-grid{
+    display:grid; grid-template-columns:repeat(3,1fr); gap:20px;
+  }
+  .principle{
+    background:var(--ink-2); border:1px solid rgba(255,246,233,0.08);
+    border-radius:18px; padding:30px 26px; position:relative; overflow:hidden;
+    transition:transform 0.25s ease, border-color 0.25s ease;
+  }
+  .principle:hover{ transform:translateY(-6px); border-color:var(--pink); }
+  .principle .num{
+    font-family:'JetBrains Mono', monospace; font-size:13px; color:var(--pink); font-weight:700;
+    letter-spacing:0.1em;
+  }
+  .principle h3{ font-size:20px; margin-top:14px; margin-bottom:12px; font-family:'Space Grotesk'; text-transform:none; font-weight:700;}
+  .principle p{ font-size:14.5px; line-height:1.6; opacity:0.78; font-weight:400; }
+  .principle .examples{
+    margin-top:16px; font-family:'JetBrains Mono', monospace; font-size:12.5px; color:var(--lime); opacity:0.9;
+  }
+
+  /* distance callout */
+  .callout{
+    margin-top:20px;
+    display:grid; grid-template-columns:1fr 1fr; gap:20px;
+  }
+  .callout .card{
+    background:linear-gradient(135deg, rgba(139,92,255,0.14), rgba(52,232,229,0.08));
+    border:1px solid rgba(139,92,255,0.35); border-radius:18px; padding:28px;
+  }
+  .callout h3{ font-size:18px; margin-bottom:10px; font-family:'Space Grotesk'; text-transform:none; font-weight:700; }
+  .callout p{ font-size:14.5px; line-height:1.6; opacity:0.82; font-weight:400; }
+  .callout .goals{ list-style:none; margin-top:6px; }
+  .callout .goals li{
+    font-size:14.5px; padding:8px 0; border-bottom:1px dashed rgba(255,246,233,0.15);
+    display:flex; gap:10px; align-items:center; font-weight:400;
+  }
+  .callout .goals li:last-child{ border-bottom:none; }
+  .callout .goals li::before{ content:"▸"; color:var(--lime); }
+
+  /* ---------- scoreboard ---------- */
+  .search-row{
+    margin-bottom:24px; position:relative; max-width:420px;
+  }
+  .search-row input{
+    width:100%; font-family:'JetBrains Mono', monospace; font-size:14px;
+    padding:14px 18px 14px 44px; border-radius:100px; color:var(--cream);
+    background:var(--ink-2); border:1px solid rgba(255,246,233,0.18);
+    outline:none; transition:border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  .search-row input::placeholder{ color:rgba(255,246,233,0.4); }
+  .search-row input:focus{
+    border-color:var(--cyan); box-shadow:0 0 0 3px rgba(52,232,229,0.18);
+  }
+  .search-row .icon{
+    position:absolute; left:18px; top:50%; transform:translateY(-50%);
+    font-size:14px; opacity:0.5; pointer-events:none;
+  }
+  .search-row .count{
+    position:absolute; right:18px; top:50%; transform:translateY(-50%);
+    font-size:11px; opacity:0.45; pointer-events:none;
+  }
+  .no-results{
+    font-family:'JetBrains Mono', monospace; font-size:14px; opacity:0.55;
+    padding:40px 0; text-align:center; grid-column:1 / -1;
+  }
+
+  .tabs{
+    display:flex; flex-wrap:wrap; gap:10px; margin-bottom:34px;
+  }
+  .tab{
+    font-family:'JetBrains Mono', monospace; font-size:12.5px; letter-spacing:0.05em;
+    padding:10px 18px; border-radius:100px; border:1px solid rgba(255,246,233,0.18);
+    background:transparent; color:var(--cream); cursor:pointer; opacity:0.7;
+    transition:all 0.2s ease;
+  }
+  .tab:hover{ opacity:1; }
+  .tab.active{ opacity:1; color:var(--ink); font-weight:700; }
+
+  .grid{
+    display:grid; grid-template-columns:repeat(auto-fill, minmax(200px,1fr)); gap:16px;
+  }
+  .card{
+    background:var(--ink-2); border-radius:16px; padding:20px;
+    border:1px solid rgba(255,246,233,0.08);
+    position:relative; overflow:hidden;
+    transition:transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    opacity:0; transform:translateY(14px);
+    animation: rise 0.5s ease forwards;
+  }
+  @keyframes rise{ to{ opacity:1; transform:translateY(0); } }
+  .card:hover{ transform:translateY(-5px) scale(1.02); box-shadow:0 14px 30px -12px rgba(0,0,0,0.5); }
+  .card .cat-dot{
+    width:8px; height:8px; border-radius:50%; display:inline-block; margin-bottom:12px;
+  }
+  .card .name{ font-size:15.5px; font-weight:600; margin-bottom:14px; min-height:38px; line-height:1.25;}
+  .card .points{
+    font-family:'JetBrains Mono', monospace; font-size:34px; font-weight:800; line-height:1;
+  }
+  .card .unit{
+    font-family:'JetBrains Mono', monospace; font-size:11px; opacity:0.55; letter-spacing:0.08em; margin-top:6px; display:block;
+  }
+  .card .bar{
+    margin-top:14px; height:5px; border-radius:4px; background:rgba(255,246,233,0.08); overflow:hidden;
+  }
+  .card .bar-fill{ height:100%; border-radius:4px; }
+
+  /* ---------- objective banner ---------- */
+  .banner{
+    background:linear-gradient(120deg, var(--pink), var(--violet));
+    border-radius:24px; padding:56px 40px; text-align:center; position:relative; overflow:hidden;
+  }
+  .banner h2{ font-size:clamp(26px,5vw,46px); color:var(--ink); line-height:1.05; }
+  .banner p{ font-family:'JetBrains Mono', monospace; font-size:14px; color:var(--ink); opacity:0.75; margin-top:14px; }
+
+  footer{
+    text-align:center; padding:40px 0 60px; font-family:'JetBrains Mono', monospace;
+    font-size:12px; opacity:0.5; letter-spacing:0.08em;
+  }
+
+  @media (max-width:760px){
+    .principle-grid{ grid-template-columns:1fr; }
+    .callout{ grid-template-columns:1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-glow">
+  <div class="blob b1"></div>
+  <div class="blob b2"></div>
+  <div class="blob b3"></div>
+</div>
+
+<nav>
+  <div class="logo">POINT<span>SYSTEM</span>.CLUB</div>
+  <div style="display:flex; align-items:center; gap:20px;">
+    <a href="YOUR-PAGE.html" style="
+      font-family:'JetBrains Mono', monospace; font-size:12px; letter-spacing:0.1em;
+      color:var(--cream); text-decoration:none; border:1px solid rgba(255,246,233,0.25);
+      border-radius:100px; padding:8px 16px; transition:all 0.2s ease;
+      opacity:0.85;
+    " onmouseover="this.style.opacity=1; this.style.borderColor='var(--cyan)';" onmouseout="this.style.opacity=0.85; this.style.borderColor='rgba(255,246,233,0.25)';">
+      YOUR LINK TEXT →
+    </a>
+    <div class="tag">V1.0 — ACTIVITY SCOREBOARD</div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="eyebrow">LIVE POINTS ENGINE</div>
+    <h1>EVERY SPORT<br>COUNTS. <span class="accent">EARN</span><br>YOUR STRIPES.</h1>
+    <p class="lede">A points system built to reward effort, honor time on the field, and welcome every kind of mover — from marathon grinders to chessboard tacticians.</p>
+  </div>
+  <div class="ticker-outer">
+    <div class="ticker-track" id="tickerTrack"></div>
+  </div>
+</header>
+
+<section id="how">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="kicker">// HOW THE POINTS WORK</span>
+      <h2>Three rules run the whole board</h2>
+    </div>
+    <div class="principle-grid">
+      <div class="principle">
+        <div class="num">RULE 01</div>
+        <h3>Effort &amp; Intensity</h3>
+        <p>Activities that demand more from your body pay out more per point. The harder the sport leans on endurance and strength, the bigger the number.</p>
+        <div class="examples">Running → 11/km · Wrestling → 90/hr</div>
+      </div>
+      <div class="principle">
+        <div class="num">RULE 02</div>
+        <h3>Time Commitment</h3>
+        <p>Most activities are scored hourly, so points track the time you actually put in — not just the outcome.</p>
+        <div class="examples">Swimming → 90/hr · Tennis → 81/hr</div>
+      </div>
+      <div class="principle">
+        <div class="num">RULE 03</div>
+        <h3>Inclusiveness</h3>
+        <p>The board isn't just cardio. Strength, mind sports, and team play all earn a seat — everyone finds a way onto the scoreboard.</p>
+        <div class="examples">Endurance · Strength · Team · Mind</div>
+      </div>
+    </div>
+
+    <div class="callout">
+      <div class="card">
+        <h3>Why distance instead of time?</h3>
+        <p>For Running, Cycling, and Walking, points are awarded per kilometer instead of per hour. Distance is a steadier measure of effort — pace varies a lot from person to person, but a kilometer covered is a kilometer earned.</p>
+      </div>
+      <div class="card">
+        <h3>The bigger goal</h3>
+        <ul class="goals">
+          <li>Promote healthy habits</li>
+          <li>Encourage consistent participation</li>
+          <li>Recognize diverse interests and abilities</li>
+          <li>Build a culture of wellness and engagement</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="board">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="kicker">// THE FULL SCOREBOARD</span>
+      <h2>50 ways to rack up points</h2>
+    </div>
+    <div class="search-row">
+      <span class="icon">🔍</span>
+      <input type="text" id="searchInput" placeholder="Search a sport… try &quot;box&quot; or &quot;yoga&quot;" autocomplete="off">
+      <span class="count" id="resultCount"></span>
+    </div>
+    <div class="tabs" id="tabs"></div>
+    <div class="grid" id="grid"></div>
+  </div>
+</section>
+
+<section id="objective">
+  <div class="wrap">
+    <div class="banner">
+      <h2>STAY ACTIVE. STAY ENGAGED.<br>KEEP EARNING POINTS.</h2>
+      <p>THE GOAL ISN'T JUST PERFORMANCE — IT'S PARTICIPATION.</p>
+    </div>
+  </div>
+</section>
+
+<footer>ACTIVITY POINT SYSTEM · BUILT FOR EVERY KIND OF MOVER</footer>
+
+<script>
+const categories = [
+  { id:"distance", label:"Go The Distance", color:"#34E8E5",
+    activities:[
+      {n:"Running", p:11, u:"pts / km"},
+      {n:"Cycling", p:4, u:"pts / km"},
+      {n:"Walking", p:8, u:"pts / km"},
+    ]},
+  { id:"racket", label:"Racket & Net", color:"#8B5CFF",
+    activities:[
+      {n:"Badminton", p:69, u:"pts / hr"},
+      {n:"Tennis", p:81, u:"pts / hr"},
+      {n:"Table Tennis", p:51, u:"pts / hr"},
+      {n:"Squash", p:90, u:"pts / hr"},
+      {n:"Pickleball", p:60, u:"pts / hr"},
+    ]},
+  { id:"team", label:"Field & Team", color:"#FF3D8A",
+    activities:[
+      {n:"Football / Soccer", p:81, u:"pts / hr"},
+      {n:"Cricket", p:60, u:"pts / hr"},
+      {n:"Basketball", p:81, u:"pts / hr"},
+      {n:"Volleyball", p:69, u:"pts / hr"},
+      {n:"Baseball", p:51, u:"pts / hr"},
+      {n:"Rugby", p:90, u:"pts / hr"},
+      {n:"Hockey", p:81, u:"pts / hr"},
+      {n:"Kabaddi", p:90, u:"pts / hr"},
+      {n:"Kho Kho", p:81, u:"pts / hr"},
+    ]},
+  { id:"combat", label:"Combat & Grind", color:"#FF7A3D",
+    activities:[
+      {n:"Wrestling", p:90, u:"pts / hr"},
+      {n:"Boxing", p:90, u:"pts / hr"},
+      {n:"Judo", p:81, u:"pts / hr"},
+      {n:"Karate", p:81, u:"pts / hr"},
+      {n:"Taekwondo", p:81, u:"pts / hr"},
+      {n:"MMA", p:99, u:"pts / hr"},
+      {n:"Weightlifting", p:81, u:"pts / hr"},
+      {n:"Powerlifting", p:81, u:"pts / hr"},
+      {n:"CrossFit", p:99, u:"pts / hr"},
+      {n:"Gym Workout", p:60, u:"pts / hr"},
+    ]},
+  { id:"water", label:"Water & Wild", color:"#4D8CFF",
+    activities:[
+      {n:"Swimming", p:90, u:"pts / hr"},
+      {n:"Rowing", p:81, u:"pts / hr"},
+      {n:"Triathlon", p:99, u:"pts / hr"},
+      {n:"Hiking", p:60, u:"pts / hr"},
+      {n:"Skiing", p:81, u:"pts / hr"},
+      {n:"Snowboarding", p:81, u:"pts / hr"},
+      {n:"Surfing", p:81, u:"pts / hr"},
+      {n:"Diving", p:69, u:"pts / hr"},
+      {n:"Canoeing", p:60, u:"pts / hr"},
+      {n:"Kayaking", p:60, u:"pts / hr"},
+      {n:"Rock Climbing", p:90, u:"pts / hr"},
+      {n:"Mountaineering", p:99, u:"pts / hr"},
+      {n:"Horse Riding", p:51, u:"pts / hr"},
+      {n:"Skating", p:69, u:"pts / hr"},
+    ]},
+  { id:"calm", label:"Calm & Core", color:"#B4FF3D",
+    activities:[
+      {n:"Golf", p:39, u:"pts / hr"},
+      {n:"Archery", p:30, u:"pts / hr"},
+      {n:"Bowling", p:30, u:"pts / hr"},
+      {n:"Snooker / Billiards", p:21, u:"pts / hr"},
+      {n:"Meditation", p:21, u:"pts / hr"},
+      {n:"Chess", p:21, u:"pts / hr"},
+      {n:"Yoga", p:39, u:"pts / hr"},
+      {n:"Pilates", p:39, u:"pts / hr"},
+      {n:"Suryanamaskar", p:60, u:"pts / hr"},
+    ]},
+];
+
+const tabsEl = document.getElementById("tabs");
+const gridEl = document.getElementById("grid");
+const tickerEl = document.getElementById("tickerTrack");
+
+let activeCat = "all";
+let searchQuery = "";
+
+function allActivities(){
+  return categories.flatMap(c => c.activities.map(a => ({...a, cat:c})));
+}
+
+function renderTabs(){
+  const allTab = document.createElement("button");
+  allTab.className = "tab active";
+  allTab.textContent = "All Sports";
+  allTab.style.background = "var(--cream)";
+  allTab.style.color = "var(--ink)";
+  allTab.dataset.cat = "all";
+  tabsEl.appendChild(allTab);
+
+  categories.forEach(c => {
+    const btn = document.createElement("button");
+    btn.className = "tab";
+    btn.textContent = c.label;
+    btn.dataset.cat = c.id;
+    tabsEl.appendChild(btn);
+  });
+
+  tabsEl.addEventListener("click", e => {
+    const btn = e.target.closest(".tab");
+    if(!btn) return;
+    activeCat = btn.dataset.cat;
+    [...tabsEl.children].forEach(t => {
+      const isActive = t === btn;
+      t.classList.toggle("active", isActive);
+      if(isActive){
+        const cat = categories.find(c => c.id === t.dataset.cat);
+        t.style.background = cat ? cat.color : "var(--cream)";
+        t.style.color = "var(--ink)";
+      } else {
+        t.style.background = "transparent";
+        t.style.color = "var(--cream)";
+      }
+    });
+    renderGrid();
+  });
+}
+
+function renderGrid(){
+  gridEl.innerHTML = "";
+  const q = searchQuery.trim().toLowerCase();
+  const items = allActivities().filter(a => {
+    const matchesCat = activeCat === "all" || a.cat.id === activeCat;
+    const matchesQuery = q === "" || a.n.toLowerCase().includes(q);
+    return matchesCat && matchesQuery;
+  });
+
+  const countEl = document.getElementById("resultCount");
+  if(countEl) countEl.textContent = q ? `${items.length} found` : "";
+
+  if(items.length === 0){
+    const empty = document.createElement("div");
+    empty.className = "no-results";
+    empty.textContent = `No sport matches "${searchQuery}" — try another search.`;
+    gridEl.appendChild(empty);
+    return;
+  }
+
+  items.forEach((a, i) => {
+    const card = document.createElement("div");
+    card.className = "card";
+    card.style.animationDelay = (i * 0.02) + "s";
+    const pct = Math.round((a.p / 99) * 100);
+    card.innerHTML = `
+      <span class="cat-dot" style="background:${a.cat.color}"></span>
+      <div class="name">${a.n}</div>
+      <div class="points" style="color:${a.cat.color}">${a.p}</div>
+      <span class="unit">${a.u}</span>
+      <div class="bar"><div class="bar-fill" style="width:${pct}%; background:${a.cat.color}"></div></div>
+    `;
+    gridEl.appendChild(card);
+  });
+}
+
+function renderTicker(){
+  const items = allActivities();
+  const build = () => items.map(a => `<span>${a.n} <b>${a.p}${a.u.includes("km") ? " pts/km" : " pts/hr"}</b></span>`).join("");
+  tickerEl.innerHTML = build() + build();
+}
+
+const searchInput = document.getElementById("searchInput");
+searchInput.addEventListener("input", e => {
+  searchQuery = e.target.value;
+  renderGrid();
+});
+
+renderTabs();
+renderGrid();
+renderTicker();
+</script>
+
+</body>
+</html>
