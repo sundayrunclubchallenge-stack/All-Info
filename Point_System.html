@@ -234,9 +234,41 @@
     font-size:12px; opacity:0.5; letter-spacing:0.08em;
   }
 
+  /* ---------- bonus zone ---------- */
+  .bonus-grid{
+    display:grid; grid-template-columns:repeat(3,1fr); gap:20px; margin-bottom:24px;
+  }
+  .bonus-card{
+    background:var(--ink-2); border:1px solid rgba(255,246,233,0.08);
+    border-radius:18px; padding:28px 26px;
+    transition:transform 0.25s ease, border-color 0.25s ease;
+  }
+  .bonus-card:hover{ transform:translateY(-6px); border-color:var(--cyan); }
+  .bonus-card h3{
+    font-size:19px; margin-bottom:4px; font-family:'Space Grotesk';
+    text-transform:none; font-weight:700;
+  }
+  .bonus-card .sub{
+    font-family:'JetBrains Mono', monospace; font-size:11px; letter-spacing:0.08em;
+    opacity:0.5; margin-bottom:18px; display:block;
+  }
+  .bonus-tier{
+    display:flex; justify-content:space-between; align-items:center; gap:10px;
+    padding:11px 0; border-bottom:1px dashed rgba(255,246,233,0.15);
+  }
+  .bonus-tier:last-child{ border-bottom:none; }
+  .bonus-tier .label{ font-size:14px; opacity:0.85; line-height:1.3; }
+  .bonus-tier .pts{
+    font-family:'JetBrains Mono', monospace; font-weight:800; font-size:13.5px;
+    padding:5px 12px; border-radius:100px; white-space:nowrap;
+  }
+  .finisher-banner{ margin-top:8px; }
+  .finisher-banner h2{ font-size:clamp(24px,4.4vw,38px); }
+
   @media (max-width:760px){
     .principle-grid{ grid-template-columns:1fr; }
     .callout{ grid-template-columns:1fr; }
+    .bonus-grid{ grid-template-columns:1fr; }
   }
 </style>
 </head>
@@ -340,6 +372,57 @@
     <div class="banner">
       <h2>STAY ACTIVE. STAY ENGAGED.<br>KEEP EARNING POINTS.</h2>
       <p>THE GOAL ISN'T JUST PERFORMANCE — IT'S PARTICIPATION.</p>
+    </div>
+  </div>
+</section>
+
+<section id="bonus">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="kicker">// BONUS ZONE</span>
+      <h2>Stack Up Extra Points</h2>
+    </div>
+
+    <div class="bonus-grid">
+      <div class="bonus-card">
+        <h3>Variety Bonus</h3>
+        <span class="sub">MIX IT UP EACH WEEK</span>
+        <div class="bonus-tier">
+          <span class="label">5 different sports in a week</span>
+          <span class="pts" style="background:rgba(52,232,229,0.15); color:var(--cyan);">+20 PTS</span>
+        </div>
+      </div>
+
+      <div class="bonus-card">
+        <h3>Consistency Bonus</h3>
+        <span class="sub">SHOW UP, DAY AFTER DAY</span>
+        <div class="bonus-tier">
+          <span class="label">7 consecutive days</span>
+          <span class="pts" style="background:rgba(139,92,255,0.15); color:var(--violet);">+10 PTS</span>
+        </div>
+        <div class="bonus-tier">
+          <span class="label">30 consecutive days</span>
+          <span class="pts" style="background:rgba(139,92,255,0.15); color:var(--violet);">+50 PTS</span>
+        </div>
+        <div class="bonus-tier">
+          <span class="label">50 consecutive days</span>
+          <span class="pts" style="background:rgba(139,92,255,0.15); color:var(--violet);">+100 PTS</span>
+        </div>
+      </div>
+
+      <div class="bonus-card">
+        <h3>Team Bonus</h3>
+        <span class="sub">WIN IT TOGETHER</span>
+        <div class="bonus-tier">
+          <span class="label">Highest weekly team participation</span>
+          <span class="pts" style="background:rgba(255,61,138,0.15); color:var(--pink);">+100 PTS</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="banner finisher-banner">
+      <h2>🏁 100 DAYS — FULL FINISH</h2>
+      <p>+1000 PTS &nbsp;+&nbsp; FINISHER RECOGNITION</p>
     </div>
   </div>
 </section>
